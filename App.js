@@ -5,10 +5,12 @@ import MainStack from './src/stacks/MainStack';
 
 export default () => {
   return (
-    <UserContextProvider>
-      <NavigationContainer>
-        <MainStack />
-      </NavigationContainer>
-    </UserContextProvider>
+    <>
+      <UserContextProvider>
+        <NavigationContainer>
+          <MainStack />
+        </NavigationContainer>
+      </UserContextProvider>
+    </>
   );
 };
