@@ -43,8 +43,8 @@ export default () => {
         });
 
         navigation.reset({
-          routes:[{ 'MainTab'} ]
-        })
+          routes: [{name: 'MainTab'}],
+        });
       } else {
         alert('Dados de entrada inválidos');
       }
@@ -92,4 +92,3 @@ export default () => {
     </Container>
   );
 };
-//! parei em 2:10:49 do vídeo
