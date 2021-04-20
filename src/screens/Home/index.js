@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Platform} from 'react-native';
+import {Platform, RefreshControl} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {request, PERMISSIONS} from 'react-native-permissions';
 import Geolocation from '@react-native-community/geolocation';
@@ -16,7 +16,10 @@ import {
   LocationInput,
   LocationFinder,
   LoadingIcon,
+  ListArea,
 } from './styles';
+
+import BarberItem from '../../components/BarberItem';
 
 import SearchIcon from '../../assets/search.svg';
 import MyLocationIcon from '../../assets/my_location.svg';
@@ -28,6 +31,7 @@ const Home = () => {
   const [coords, setCoords] = useState(null);
   const [loading, setLoading] = useState(false);
   const [list, setList] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const handlerLocationFinder = async () => {
     setCoords(null);
@@ -37,7 +41,7 @@ const Home = () => {
         : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
     );
 
-    if (result == 'granted') {
+    if (result === 'granted') {
       setLoading(true);
       setLocationText('');
       setList([]);
@@ -53,7 +57,15 @@ const Home = () => {
     setLoading(true);
     setList([]);
 
-    let res = await Api.getBarbers();
+    let latitude = null;
+    let longitude = null;
+
+    if (coords) {
+      latitude = coords.latitude;
+      longitude = coords.longitude;
+    }
+
+    let res = await Api.getBarbers(latitude, longitude, locationText);
     if (res.error === '') {
       if (res.loc) {
         setLocationText(res.loc);
@@ -69,9 +81,22 @@ const Home = () => {
     getBarbers();
   }, []);
 
+  const onRefresh = () => {
+    setRefreshing(false);
+    getBarbers();
+  };
+
+  const handlerLocationSearch = () => {
+    setCoords({});
+    getBarbers();
+  };
+
   return (
     <Container>
-      <Scroller>
+      <Scroller
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         <HeaderArea>
           <HeaderTitle numberOfLines={2}>
             Encontre o seu barbeiro favorito
@@ -87,6 +112,7 @@ const Home = () => {
             placeholderTextColor="#fff"
             value={locationText}
             onChangeText={t => setLocationText(t)}
+            onEndEditing={handlerLocationSearch}
           />
           <LocationFinder onPress={handlerLocationFinder}>
             <MyLocationIcon width="24" height="24" fill="#fff" />
@@ -95,7 +121,11 @@ const Home = () => {
 
         {loading && <LoadingIcon size="large" color="#fff" />}
 
-        
+        <ListArea>
+          {list.map((item, key) => (
+            <BarberItem key={key} data={item} />
+          ))}
+        </ListArea>
       </Scroller>
     </Container>
   );
