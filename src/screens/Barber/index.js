@@ -4,9 +4,13 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Swiper from 'react-native-swiper';
 
 import Stars from '../../components/Stars';
+import BarberModal from '../../components/BarberModal';
 
 import FavoriteIcon from '../../assets/favorite.svg';
+import FavoriteFullIcon from '../../assets/favorite_full.svg';
 import BackIcon from '../../assets/back.svg';
+import NavPrevIcon from '../../assets/nav_prev.svg';
+import NavNextIcon from '../../assets/nav_next.svg';
 
 import {
   Container,
@@ -28,8 +32,15 @@ import {
   LoadingIcon,
   ServicesTitle,
   ServiceItem,
+  ServiceInfo,
   ServiceName,
   ServicePrice,
+  ServiceChooseButton,
+  ServiceChooseButtonText,
+  TestimonialItem,
+  TestimonialInfo,
+  TestimonialName,
+  TestimonialBody,
 } from './styles';
 
 import Api from '../../Api';
@@ -46,6 +57,9 @@ function Barber() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [favorited, setFavorited] = useState(false);
+  const [selectedService, setSelectService] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const getBarberInfo = async () => {
@@ -54,6 +68,7 @@ function Barber() {
       let json = await Api.getBarber(userInfo.id);
       if (json.error == '') {
         setUserInfo(json.data);
+        setFavorited(json.data.favorited);
       } else {
         alert('Erro: ' + json.error);
       }
@@ -65,6 +80,16 @@ function Barber() {
 
   const handleBackButton = () => {
     navigation.goBack();
+  };
+
+  const handleFavClick = () => {
+    setFavorited(!favorited);
+    Api.setFavorite(userInfo.id);
+  };
+
+  const handleServiceChoose = key => {
+    setSelectService(key);
+    setShowModal(true);
   };
 
   return (
@@ -93,31 +118,66 @@ function Barber() {
               <UserInfoName>{userInfo.name}</UserInfoName>
               <Stars stars={userInfo.stars} showNumber={true} />
             </UserInfo>
-            <UserFavButton>
-              <FavoriteIcon width="24" height="24" fill="#ff0000" />
+            <UserFavButton onPress={handleFavClick}>
+              {favorited ? (
+                <FavoriteFullIcon width="24" height="24" fill="#ff0000" />
+              ) : (
+                <FavoriteIcon width="24" height="24" fill="#ff0000" />
+              )}
             </UserFavButton>
           </UserInfoArea>
 
           {loading && <LoadingIcon size="large" color="#000" />}
 
-          <ServiceArea>
-            <ServicesTitle>Lista de Serviços</ServicesTitle>
+          {userInfo.services && (
+            <ServiceArea>
+              <ServicesTitle>Lista de Serviços</ServicesTitle>
 
-            {userInfo.services.map((item, key) => (
-              <ServiceItem key={key}>
-                <ServiceItem>
-                  <ServiceName>{item.name}</ServiceName>
-                  <ServicePrice>R$ {item.price}</ServicePrice>
+              {userInfo.services.map((item, key) => (
+                <ServiceItem key={key}>
+                  <ServiceInfo>
+                    <ServiceName>{item.name}</ServiceName>
+                    <ServicePrice>R$ {item.price}</ServicePrice>
+                  </ServiceInfo>
+                  <ServiceChooseButton onPress={() => handleServiceChoose(key)}>
+                    <ServiceChooseButtonText>Agendar</ServiceChooseButtonText>
+                  </ServiceChooseButton>
                 </ServiceItem>
-              </ServiceItem>
-            ))}
-          </ServiceArea>
-          <TestimonialsArea />
+              ))}
+            </ServiceArea>
+          )}
+          {userInfo.testimonials && userInfo.testimonials.length > 0 && (
+            <TestimonialsArea>
+              <Swiper
+                style={{height: 110}}
+                showsPagination={false}
+                showsButtons={true}
+                prevButton={<NavPrevIcon width="35" height="35" fill="#000" />}
+                nextButton={<NavNextIcon width="35" height="35" fill="#000" />}>
+                {userInfo.testimonials.map((item, key) => (
+                  <TestimonialItem key={key}>
+                    <TestimonialInfo>
+                      <TestimonialName>{item.name}</TestimonialName>
+                      <Stars stars={item.rate} showNumber={false} />
+                    </TestimonialInfo>
+                    <TestimonialBody>{item.body}</TestimonialBody>
+                  </TestimonialItem>
+                ))}
+              </Swiper>
+            </TestimonialsArea>
+          )}
         </PageBody>
       </Scroller>
       <BackButton onPress={handleBackButton}>
         <BackIcon width="44" height="44" fill="#fff" />
       </BackButton>
+
+      <BarberModal
+        show={showModal}
+        setShow={setShowModal}
+        user={userInfo}
+        service={selectedService}
+      />
     </Container>
   );
 }
