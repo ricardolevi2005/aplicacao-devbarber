@@ -69,6 +69,7 @@ function Barber() {
       if (json.error == '') {
         setUserInfo(json.data);
         setFavorited(json.data.favorited);
+        console.log(json.data.available);
       } else {
         alert('Erro: ' + json.error);
       }
