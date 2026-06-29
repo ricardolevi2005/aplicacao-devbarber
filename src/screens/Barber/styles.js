@@ -166,7 +166,6 @@ export const TestimonialBody = styled.Text`
   color: #fff;
 `;
 
-
 export const BackButton = styled.TouchableOpacity`
   position: absolute;
   left: 0;

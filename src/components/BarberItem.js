@@ -51,7 +51,7 @@ const BarberItem = ({data}) => {
       avatar: data.avatar,
       name: data.name,
       stars: data.stars,
-    })
+    });
   };
 
   return (

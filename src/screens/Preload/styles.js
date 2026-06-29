@@ -8,5 +8,5 @@ export const Container = styled.SafeAreaView`
 `;
 
 export const LoadingIcon = styled.ActivityIndicator`
-  margin-top: 50px
+  margin-top: 50px;
 `;
