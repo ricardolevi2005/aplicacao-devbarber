@@ -279,7 +279,7 @@ function BarberModal({show, setShow, user, service}) {
       // } else {
       //   alert(res.error);
       // }
-      setShow(false)
+      setShow(false);
       navigation.navigate('Appointments');
     } else {
       alert('Preencha todos os dados necessários');
